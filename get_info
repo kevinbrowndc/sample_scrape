@@ -1,0 +1,159 @@
+from bs4 import BeautifulSoup as bs
+import time
+import requests
+import openpyxl
+import smtplib
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+
+localtime = time.asctime( time.localtime(time.time()) )
+punctuation = "!@#$%^&*()_+<>?:.,;"
+
+def abc():
+    file_name = "/job_board.xlsx"
+    open(file_name)
+    wb = openpyxl.load_workbook(file_name)
+    ws = wb.active
+    f = "/job_board_mail.xlsx"
+    open(f)
+    wb1 = openpyxl.load_workbook(f)
+    ws1 = wb1.active
+    
+    A = []
+    B = []
+    print(localtime)
+    url = "https://www."
+    html = requests.get(url).text
+    soup = bs(html, "lxml")
+
+    for div in soup.findAll('h2'):
+        A.append(div.text)
+
+    c = []
+    companies = []
+    for div in soup.findAll('div', {"class": "card-contact-block"}):
+        a = []
+        a.append(div.text)
+
+        for x in a:
+            lst = [x]
+            if x[2] == 'p':
+                pass
+            else:
+                a = (lst[0])
+                b = a.split()
+                c = (b[1:9])
+                d = c.pop(-1)
+                e = ' '.join(c)
+                companies.append(e)
+
+    dictionary = dict(zip(A, companies))
+    for k,v in dictionary.items():
+        new_row = ws.max_row +1
+        x = [localtime, k, v, "-"]
+        ws.cell(column = 1, row = new_row, value = x[0])
+        ws.cell(column = 2, row = new_row, value = x[1])
+        ws.cell(column = 3, row = new_row, value = x[2])
+        ws.cell(column = 4, row = new_row, value = x[3])
+        ws1.cell(column = 1, row = new_row, value = x[0])
+        ws1.cell(column = 2, row = new_row, value = x[1])
+        ws1.cell(column = 3, row = new_row, value = x[2])
+        ws1.cell(column = 4, row = new_row, value = x[3])
+
+    wb.save(file_name)
+    wb.close()
+    wb1.save(f)
+    wb1.close()
+
+
+def efg():
+    file_name = "/job_board.xlsx"
+    open(file_name)
+    wb = openpyxl.load_workbook(file_name)
+    ws = wb.active
+    f = "/job_board_mail.xlsx"
+    open(f)
+    wb1 = openpyxl.load_workbook(f)
+    ws1 = wb1.active
+
+
+    C = []
+    D = []
+    print(localtime)
+    url =  "https://www."
+
+    html = requests.get(url).text
+    soup = bs(html, "lxml")
+
+
+    for div in soup.findAll('div', {"class": "company-title"}):
+        C.append(div.text)
+    for div in soup.findAll('h5', {"class": "p-title"}):
+        D.append(div.text)
+    dictionary = dict(zip(D, C))
+
+    for k,v in dictionary.items():
+        new_row = ws.max_row +1
+        x = [localtime, k, v, "-"]
+        ws.cell(column = 1, row = new_row, value = x[0])
+        ws.cell(column = 2, row = new_row, value = x[1])
+        ws.cell(column = 3, row = new_row, value = x[2])
+        ws.cell(column = 4, row = new_row, value = x[3])
+        ws1.cell(column = 1, row = new_row, value = x[0])
+        ws1.cell(column = 2, row = new_row, value = x[1])
+        ws1.cell(column = 3, row = new_row, value = x[2])
+        ws1.cell(column = 4, row = new_row, value = x[3])
+
+        wb.save(file_name)
+        wb.close()
+        wb1.save(f)
+        wb1.close()
+
+def mail():
+    mail = ['kevin@', 'email', 'email', 'email', 'email']
+    
+    for item in mail:
+        COMMASPACE = ', '
+
+        msg = MIMEMultipart()
+        msg['Subject'] = 'Weekly Job Report Summary'
+        msg['From'] = 'kevin@'
+
+        msg['To'] = item
+        msg.preamble = 'This report covers the past week.'
+
+        part = MIMEBase('application', "octet-stream")
+        part.set_payload(open("/job_board.xlsx", "rb").read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', 'attachment; filename="/home/kevinbrowndc/job_board_mail.xlsx"')
+        msg.attach(part)
+
+        password = 'ABCD'
+
+        server = smtplib.SMTP('smtp.zoho.com: 587')
+        server.starttls()
+        server.login(msg['From'], password)
+        server.sendmail(msg['From'], msg['To'], msg.as_string())
+        server.quit()
+    
+def clear():
+    file_name = '/job_board_mail.xlsx'
+    open(file_name)
+    wb = openpyxl.load_workbook(file_name)
+    ws = wb.active
+
+    for row in ws['A1:G10000']:
+        for cell in row:
+            cell.value = None
+    wb.save(file_name)
+    wb.close()
+    
+
+abc()
+print('files written')
+efg()
+print('files written')
+mail()
+print('daily file mailed')
+clear()
+print("daily file cleared")
